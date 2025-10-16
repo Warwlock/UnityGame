@@ -33,7 +33,7 @@ public class Container : MonoBehaviour
         meshData.ClearData();
 
         Vector3 blockPos = new Vector3(8, 8, 8);
-        Voxel block = new Voxel() { ID = 1 };
+        Voxel block = new Voxel() { };
 
         int counter = 0;
         Vector3[] faceVertices = new Vector3[4];
