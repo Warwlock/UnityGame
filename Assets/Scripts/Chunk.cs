@@ -4,34 +4,38 @@ using UnityEngine;
 using NoiseDotNet;
 using System;
 using Unity.Jobs;
+using Unity.Collections;
 
-public class Chunk : MonoBehaviour
+public class Chunk : IDisposable
 {
-    static int3 chunkSize = new int3(16, 384, 16);
+    int2 position;
 
-    int2 position = new int2(0, 0);
+    public ChunkState state;
 
-    List<Voxel> voxelData = new List<Voxel>();
+    NativeArray<Voxel> voxelData;
 
-    float[] xCoords = new float[chunkSize.x * chunkSize.z];
+    float[] xCoords;
 
-    float[] yCoords = new float[chunkSize.x * chunkSize.z];
+    float[] yCoords;
 
-    float[] output = new float[chunkSize.x * chunkSize.z];
+    float[] output;
 
     float GetValueAt(int x, int y)
     {
-        return output[y * chunkSize.z + x];
+        return output[y * ChunkDefs.ChunkSizeXZ + x];
     }
 
     JobHandle noiseJobHandle;
-    bool isGenerated;
 
-    void Start()
+    public Chunk(bool geenrate)
     {
+        xCoords = new float[ChunkDefs.ChunkArea];
+        yCoords = new float[ChunkDefs.ChunkArea];
+        output = new float[ChunkDefs.ChunkArea];
+
         int index = 0;
-        for (int y = 0; y < chunkSize.z; y++)
-            for (int x = 0; x < chunkSize.x; x++)
+        for (int y = 0; y < ChunkDefs.ChunkSizeXZ; y++)
+            for (int x = 0; x < ChunkDefs.ChunkSizeXZ; x++)
             {
                 xCoords[index] = x;
                 yCoords[index] = y;
@@ -73,14 +77,15 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    void Update()
+    // Will be deleted after implemetation in another script
+    /*void Update()
     {
-        if (noiseJobHandle.IsCompleted && !isGenerated)
+        if (noiseJobHandle.IsCompleted && state == ChunkState.Generating)
         {
             noiseJobHandle.Complete();
-            isGenerated = true;
+            state = ChunkState.ReadyForMesh;
 
-            for (int i = 0; i < chunkSize.x * chunkSize.z; i++)
+            for (int i = 0; i < ChunkDefs.ChunkArea; i++)
             {
                 GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 float height = Mathf.CeilToInt(output[i] * 10f);
@@ -92,5 +97,10 @@ public class Chunk : MonoBehaviour
             }
             noiseJobHandle = CreateGradient2DNoiseJob(xCoords, yCoords, output, 0.1f, 0.1f, 1f, 100).Schedule();
         }
+    }*/
+
+    public void Dispose()
+    {
+        
     }
 }
